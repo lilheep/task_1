@@ -15,7 +15,12 @@ class Users(DB):
     id = IntegerField(primary_key=True)
     user_name = CharField(max_length=20)
     password = CharField(max_length=50) 
-    
+
 db.connect()
 db.create_tables([Users], safe=True)
+
+if not Users.select().exists():
+    Users.create(user_name='Vitaliy Mashkov', password='aboba1337')
+    Users.create(user_name='Kirill Nasekomoe', password='1Cnepython')
+
 db.close()

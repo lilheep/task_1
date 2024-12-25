@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 import os
 
+
 os.environ['TCL_LIBRARY'] = r"C:\Users\User\AppData\Local\Programs\Python\Python313\tcl\tcl8.6"
 os.environ['TK_LIBRARY'] = r"C:\Users\User\AppData\Local\Programs\Python\Python313\tcl\tk8.6"
 
@@ -34,6 +35,3 @@ def load_data():
 load_data()
 
 window.mainloop()
-
-models.Users.get_or_create(user_name='Vitaliy Mashkov', password='aboba1337')
-models.Users.get_or_create(user_name='Kirill Nasekomoe', password='1Cnepython')
