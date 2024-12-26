@@ -1,9 +1,58 @@
-import models
-import peewee
+from peewee import Model, MySQLDatabase, CharField, MySQLDatabase, AutoField
 import tkinter as tk
 from tkinter import ttk
 import os
+import pymysql
 
+db_connection = MySQLDatabase(
+    'users_1',
+    user='root', 
+    password='root', 
+    host='localhost',
+    port=3306
+)
+
+def initialize_database():
+
+    connection = pymysql.connect(
+        host='localhost',
+        user='root', 
+        password='root' 
+    )
+    cursor = connection.cursor()
+    cursor.execute("CREATE DATABASE IF NOT EXISTS users_1")
+    cursor.close()
+    connection.close()
+
+    db_connection.init(
+        'users_1', 
+        user='root',
+        password='root',
+        host='localhost',
+        port=3306
+    )
+    
+class BaseModel(Model):
+    class Meta:
+        database = db_connection
+
+class Users(BaseModel):
+    id = AutoField()
+    user_name = CharField(max_length=20, unique=True)
+    password = CharField(max_length=50, unique=True)
+
+if __name__ == '__main__':
+    initialize_database()
+    db_connection.connect()
+    
+    db_connection.create_tables([Users], safe=True)
+
+    if not Users.select().exists():
+        
+            Users.create(user_name='Vitaliy Mashkov', password='aboba1337')
+            Users.create(user_name='Kirill Nasekomoe', password='1Cnepython')
+
+    db_connection.close()
 
 os.environ['TCL_LIBRARY'] = r"C:\Users\User\AppData\Local\Programs\Python\Python313\tcl\tcl8.6"
 os.environ['TK_LIBRARY'] = r"C:\Users\User\AppData\Local\Programs\Python\Python313\tcl\tk8.6"
@@ -26,11 +75,11 @@ tree.column("password", width=200, anchor='center')
 tree.pack(fill=tk.BOTH, expand=True)
 
 def load_data():
-    models.db_connection.connect()
-    for user in models.Users.select():
+    db_connection.connect()
+    for user in Users.select():
         tree.insert('', 'end', values=(user.id, user.user_name, user.password))
     
-    models.db_connection.close()
+    db_connection.close()
 
 load_data()
 
