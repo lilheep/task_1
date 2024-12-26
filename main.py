@@ -26,11 +26,11 @@ tree.column("password", width=200, anchor='center')
 tree.pack(fill=tk.BOTH, expand=True)
 
 def load_data():
-    models.db.connect()
+    models.db_connection.connect()
     for user in models.Users.select():
         tree.insert('', 'end', values=(user.id, user.user_name, user.password))
     
-    models.db.close()
+    models.db_connection.close()
 
 load_data()
 
