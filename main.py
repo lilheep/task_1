@@ -1,9 +1,7 @@
 import models
-import peewee
 import tkinter as tk
 from tkinter import ttk
 import os
-
 
 os.environ['TCL_LIBRARY'] = r"C:\Users\User\AppData\Local\Programs\Python\Python313\tcl\tcl8.6"
 os.environ['TK_LIBRARY'] = r"C:\Users\User\AppData\Local\Programs\Python\Python313\tcl\tk8.6"
