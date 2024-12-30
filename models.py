@@ -11,10 +11,20 @@ class Users(BaseModel):
     user_name = CharField(max_length=20, unique=True)
     password = CharField(max_length=50, unique=True)
 
+class Staffs(BaseModel):
+    id = AutoField()
+    user_name = CharField(max_length=20, unique=True)
+    password = CharField(max_length=50, unique=True)
+    
+class Students(BaseModel):
+    id = AutoField()
+    user_name = CharField(max_length=20, unique=True)
+    password = CharField(max_length=50, unique=True)
+
 
 def initialize_tables():
     '''Creating tables if they does not exists'''
-    db_connection.create_tables([Users], safe=True)
+    db_connection.create_tables([Users, Staffs, Students], safe=True)
     print('Tables is initialized')
 
 def initialize_data():
