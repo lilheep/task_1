@@ -13,20 +13,23 @@ window.resizable(False, False)
 notebook = ttk.Notebook(window)
 notebook.pack(fill=tk.BOTH, expand=True)
 
+columns = {models.Users: ('id', 'user_name', 'password'),
+           models.Staffs: ('id', 'staff_name', 'staff_password'),
+            models.Students: ('id', 'student_name', 'student_password')}
+
 
 def create_table_page(notebook, table_model, page_title):
 
     frame = ttk.Frame(notebook)
     notebook.add(frame, text=page_title)
+    
+    table_columns = columns[table_model]
 
-    tree = ttk.Treeview(frame, columns=("id", "user_name", "password"), show="headings")
-
-    tree.heading("id", text="id")
-    tree.heading("user_name", text="user_name")
-    tree.heading("password", text="password")
-    tree.column("id", width=50, anchor='center')
-    tree.column("user_name", width=150, anchor='center')
-    tree.column("password", width=200, anchor='center')
+    tree = ttk.Treeview(frame, columns=table_columns, show="headings")
+    
+    for col in table_columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=150, anchor='center')
 
     tree.pack(fill=tk.BOTH, expand=True)
 
@@ -34,21 +37,25 @@ def create_table_page(notebook, table_model, page_title):
  
         tree.delete(*tree.get_children())
         for record in table_model.select():
-            tree.insert('', 'end', values=(record.id, record.user_name, record.password))
+            tree.insert('', 'end', values=tuple(getattr(record, col) for col in table_columns))
 
     def add_record():
   
         def save_record():
-            username = entry_name.get().strip()
-            password = entry_password.get().strip()
-
-            if username and password:
+            
+            data = {col: entries[i].get().strip() for i, col in enumerate(table_columns[1:])}
+            
+            for i, col in enumerate(table_columns[1:], start=1):
+                data[col] = entries[i-1].get().strip()
+                
+            if all(data.values()):
+                
                 try:
-                    table_model.create(user_name=username, password=password)
+                    table_model.create(**data)
                     load_data()
                     messagebox.showinfo('Success!', 'The record has been added')
                     add_window.destroy()
-
+                
                 except Exception as e:
                     messagebox.showerror('Error!', f'Failed to add record: {e}')
             else:
@@ -57,14 +64,14 @@ def create_table_page(notebook, table_model, page_title):
         add_window = tk.Toplevel(window)
         add_window.geometry('200x300')
         add_window.title('Add Record')
-
-        tk.Label(add_window, text='Name:').pack(pady=5)
-        entry_name = tk.Entry(add_window)
-        entry_name.pack(pady=5)
-
-        tk.Label(add_window, text='Password:').pack(pady=5)
-        entry_password = tk.Entry(add_window)
-        entry_password.pack(pady=5)
+        
+        entries = []
+        
+        for col in table_columns[1:]:
+            tk.Label(add_window, text=f'{col.capitalize()}:').pack(pady=5)
+            entry = tk.Entry(add_window)
+            entry.pack(pady=5)
+            entries.append(entry)
 
         tk.Button(add_window, text='Save', command=save_record).pack(pady=10)
 
@@ -76,41 +83,39 @@ def create_table_page(notebook, table_model, page_title):
             return
 
         record_id = tree.item(selected[0])['values'][0]
+        record = table_model.get(table_model.id == record_id)
 
         def save_edit():
-            username = entry_name.get().strip()
-            password = entry_password.get().strip()
-
-            if username and password:
+            
+            data = {col: entries[i].get().strip() for i, col in enumerate(table_columns[1:])}
+                
+            if all(data.values()):
                 try:
-                    record = table_model.get(table_model.id == record_id)
-                    record.user_name = username
-                    record.password = password
+                    for col, value in data.items():
+                        setattr(record, col, value)
                     record.save()
                     load_data()
                     messagebox.showinfo('Success!', 'Record has been updated!')
                     edit_window.destroy()
-
+                
                 except Exception as e:
                     messagebox.showerror('Error!', f"Couldn't update record: {e}")
+            
             else:
                 messagebox.showwarning('Attention!', 'All fields must be filled in!')
-
-        record = table_model.get(table_model.id == record_id)
 
         edit_window = tk.Toplevel(window)
         edit_window.geometry('200x300')
         edit_window.title('Edit Record')
 
-        tk.Label(edit_window, text='Name:').pack(pady=5)
-        entry_name = tk.Entry(edit_window)
-        entry_name.insert(0, record.user_name)
-        entry_name.pack(pady=5)
-
-        tk.Label(edit_window, text='Password:').pack(pady=5)
-        entry_password = tk.Entry(edit_window)
-        entry_password.insert(0, record.password)
-        entry_password.pack(pady=5)
+        entries = []
+        
+        for col in table_columns[1:]:
+            tk.Label(edit_window, text=f'{col.capitalize()}:').pack(pady=5)
+            entry = tk.Entry(edit_window)
+            entry.insert(0, getattr(record, col))
+            entry.pack(pady=5)
+            entries.append(entry)
 
         tk.Button(edit_window, text='Save', command=save_edit).pack(pady=10)
 

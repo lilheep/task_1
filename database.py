@@ -25,7 +25,8 @@ def init_database():
     except MySQLError as e:
         print(f"Error creating database: {e}")
     finally:
-        connection.close()
+        if 'connection' in locals() and connection:
+            connection.close()
 
 # Initialize
 init_database()

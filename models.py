@@ -13,13 +13,13 @@ class Users(BaseModel):
 
 class Staffs(BaseModel):
     id = AutoField()
-    user_name = CharField(max_length=20, unique=True)
-    password = CharField(max_length=50, unique=True)
+    staff_name = CharField(max_length=20, unique=True)
+    staff_password = CharField(max_length=50, unique=True)
     
 class Students(BaseModel):
     id = AutoField()
-    user_name = CharField(max_length=20, unique=True)
-    password = CharField(max_length=50, unique=True)
+    student_name = CharField(max_length=20, unique=True)
+    student_password = CharField(max_length=50, unique=True)
 
 
 def initialize_tables():
