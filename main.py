@@ -13,9 +13,10 @@ window.resizable(False, False)
 notebook = ttk.Notebook(window)
 notebook.pack(fill=tk.BOTH, expand=True)
 
-columns = {models.Users: ('id', 'user_name', 'password'),
+columns = {models.Users: ('id', 'user_name', 'password', 'role'),
            models.Staffs: ('id', 'staff_name', 'staff_password'),
-            models.Students: ('id', 'student_name', 'student_password')}
+            models.Students: ('id', 'student_name', 'student_password'),
+            models.Roles: ('id', 'role_name')}
 
 
 def create_table_page(notebook, table_model, page_title):
@@ -29,7 +30,7 @@ def create_table_page(notebook, table_model, page_title):
     
     for col in table_columns:
         tree.heading(col, text=col)
-        tree.column(col, width=150, anchor='center')
+        tree.column(col, width=125, anchor='center')
 
     tree.pack(fill=tk.BOTH, expand=True)
 
@@ -43,10 +44,16 @@ def create_table_page(notebook, table_model, page_title):
   
         def save_record():
             
-            data = {col: entries[i].get().strip() for i, col in enumerate(table_columns[1:])}
+            data = {}
             
             for i, col in enumerate(table_columns[1:], start=1):
-                data[col] = entries[i-1].get().strip()
+                if col == 'role':
+                    selected_role = combobox_roles.get()
+                    if selected_role:
+                        role_id = int(selected_role.split(':')[0]) 
+                        data[col] = models.Roles.get(models.Roles.id == role_id)
+                else:
+                    data[col] = entries[i-1].get().strip()
                 
             if all(data.values()):
                 
@@ -66,12 +73,18 @@ def create_table_page(notebook, table_model, page_title):
         add_window.title('Add Record')
         
         entries = []
+        combobox_roles = None
         
         for col in table_columns[1:]:
             tk.Label(add_window, text=f'{col.capitalize()}:').pack(pady=5)
-            entry = tk.Entry(add_window)
-            entry.pack(pady=5)
-            entries.append(entry)
+            if col == 'role':
+                roles = [f'{role.id}: {role.role_name}' for role in models.Roles.select()]
+                combobox_roles = ttk.Combobox(add_window, values=roles, state='readonly')
+                combobox_roles.pack(pady=5)
+            else:
+                entry = tk.Entry(add_window)
+                entry.pack(pady=5)
+                entries.append(entry)
 
         tk.Button(add_window, text='Save', command=save_record).pack(pady=10)
 
@@ -87,9 +100,19 @@ def create_table_page(notebook, table_model, page_title):
 
         def save_edit():
             
-            data = {col: entries[i].get().strip() for i, col in enumerate(table_columns[1:])}
+            data = {}
+            for i, col in enumerate(table_columns[1:], start=1):
                 
+                if col == 'role':
+                    selected_role = combobox_role.get()
+                    if selected_role:
+                        role_id = int(selected_role.split(':')[0])
+                        data[col] = models.Roles.get(models.Roles.id == role_id)
+                else:
+                    data[col] = entries[i - 1].get().strip()
+
             if all(data.values()):
+                
                 try:
                     for col, value in data.items():
                         setattr(record, col, value)
@@ -97,10 +120,9 @@ def create_table_page(notebook, table_model, page_title):
                     load_data()
                     messagebox.showinfo('Success!', 'Record has been updated!')
                     edit_window.destroy()
-                
+
                 except Exception as e:
                     messagebox.showerror('Error!', f"Couldn't update record: {e}")
-            
             else:
                 messagebox.showwarning('Attention!', 'All fields must be filled in!')
 
@@ -109,13 +131,22 @@ def create_table_page(notebook, table_model, page_title):
         edit_window.title('Edit Record')
 
         entries = []
+        combobox_role = None
         
         for col in table_columns[1:]:
             tk.Label(edit_window, text=f'{col.capitalize()}:').pack(pady=5)
-            entry = tk.Entry(edit_window)
-            entry.insert(0, getattr(record, col))
-            entry.pack(pady=5)
-            entries.append(entry)
+            if col == 'role':
+                roles = [f'{role.id}: {role.role_name}' for role in models.Roles.select()]
+                combobox_role = ttk.Combobox(edit_window, values=roles, state='readonly')
+                current_role = record.role
+                if current_role:
+                    combobox_role.set(f'{current_role.id}: {current_role.role_name}')
+                combobox_role.pack(pady=5)
+            else:
+                entry = tk.Entry(edit_window)
+                entry.insert(0, getattr(record, col))
+                entry.pack(pady=5)
+                entries.append(entry)
 
         tk.Button(edit_window, text='Save', command=save_edit).pack(pady=10)
 
@@ -151,6 +182,7 @@ models.db_connection.connect()
 create_table_page(notebook, models.Users, "Users Table")
 create_table_page(notebook, models.Staffs, "Staffs Table")
 create_table_page(notebook, models.Students, "Students Table")
+create_table_page(notebook, models.Roles, "Roles Table")
 
 def close_connection():
     if not models.db_connection.is_closed():

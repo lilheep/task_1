@@ -1,4 +1,4 @@
-from peewee import Model, CharField, AutoField
+from peewee import Model, CharField, AutoField, ForeignKeyField
 from database import db_connection
 
 class BaseModel(Model):
@@ -6,10 +6,15 @@ class BaseModel(Model):
         database = db_connection
 
 
+class Roles(BaseModel):
+    id = AutoField()
+    role_name = CharField(max_length=50, unique=True)
+
 class Users(BaseModel):
     id = AutoField()
     user_name = CharField(max_length=20, unique=True)
     password = CharField(max_length=50, unique=True)
+    role = ForeignKeyField(Roles, backref='users', on_delete='CASCADE')
 
 class Staffs(BaseModel):
     id = AutoField()
@@ -24,14 +29,21 @@ class Students(BaseModel):
 
 def initialize_tables():
     '''Creating tables if they does not exists'''
-    db_connection.create_tables([Users, Staffs, Students], safe=True)
+    db_connection.create_tables([Users, Staffs, Students, Roles], safe=True)
     print('Tables is initialized')
 
 def initialize_data():
     '''Filing test data to tables'''
+    if not Roles.select().exists():
+        role_admin = Roles.create(role_name='Admin')
+        role_user = Roles.create(role_name='User')
+    else:
+        role_admin = Roles.get(Roles.role_name == 'Admin')
+        role_user = Roles.get(Roles.role_name == 'User')
+    
     if not Users.select().exists():    
-        Users.create(user_name='Vitaliy Mashkov', password='aboba1337')
-        Users.create(user_name='Kirill Nasekomoe', password='1Cnepython')
+        Users.create(user_name='Vitaliy Mashkov', password='aboba1337', role=role_admin)
+        Users.create(user_name='Kirill Nasekomoe', password='1Cnepython', role=role_user)
     print('Test data has been filled')
 
 # Initialize
