@@ -1,3 +1,4 @@
 peewee
 pymysql
 cryptography
+fastapi

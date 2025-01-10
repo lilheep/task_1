@@ -18,11 +18,20 @@ columns = {models.Users: ('id', 'user_name', 'password', 'role'),
             models.Students: ('id', 'student_name', 'student_password'),
             models.Roles: ('id', 'role_name')}
 
+table_titles = {
+    models.Users: "Users Table",
+    models.Staffs: "Staffs Table",
+    models.Students: "Students Table",
+    models.Roles: "Roles Table",
+}
 
-def create_table_page(notebook, table_model, page_title):
+tab_frames = {}
 
-    frame = ttk.Frame(notebook)
-    notebook.add(frame, text=page_title)
+
+def create_table_page(frame, table_model, page_title):
+
+    for widget in frame.winfo_children():
+        widget.destroy()
     
     table_columns = columns[table_model]
 
@@ -188,14 +197,25 @@ def create_table_page(notebook, table_model, page_title):
     tk.Button(button_frame, text='Delete', command=delete_record).pack(side='left', padx=5)
 
     load_data()
+    
+def on_tab_changed(event):
+    select_tab_index = notebook.index(notebook.select())
+    table_model = list(columns.keys())[select_tab_index]
+    page_title = table_titles[table_model]
+    create_table_page(tab_frames[table_model], table_model, page_title)
+    
+for table_model, page_title in table_titles.items():
+    frame = ttk.Frame(notebook)
+    notebook.add(frame, text=page_title)
+    tab_frames[table_model] = frame
+    
+notebook.bind('<<NotebookTabChanged>>', on_tab_changed)
 
+initial_model, initial_title = list(table_titles.items())[0]
+create_table_page(tab_frames[initial_model], initial_model, initial_title)
 
-models.db_connection.connect()
-
-create_table_page(notebook, models.Users, "Users Table")
-create_table_page(notebook, models.Staffs, "Staffs Table")
-create_table_page(notebook, models.Students, "Students Table")
-create_table_page(notebook, models.Roles, "Roles Table")
+if models.db_connection.is_closed():
+    models.db_connection.connect()
 
 def close_connection():
     if not models.db_connection.is_closed():
