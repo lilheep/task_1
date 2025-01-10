@@ -14,7 +14,7 @@ class Users(BaseModel):
     id = AutoField()
     user_name = CharField(max_length=20, unique=True)
     password = CharField(max_length=50, unique=True)
-    role = ForeignKeyField(Roles, backref='users', on_delete='CASCADE')
+    role = ForeignKeyField(Roles, backref='users', on_delete='SET NULL', null=True)
 
 class Staffs(BaseModel):
     id = AutoField()

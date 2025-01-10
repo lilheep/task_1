@@ -37,9 +37,22 @@ def create_table_page(notebook, table_model, page_title):
     def load_data():
  
         tree.delete(*tree.get_children())
+         
         for record in table_model.select():
-            tree.insert('', 'end', values=tuple(getattr(record, col) for col in table_columns))
-
+            row_data = []
+            for col in table_columns:
+                value = getattr(record, col)
+                
+                if col == 'role' and value is not None:
+                    value = value.role_name
+                
+                elif col == 'role' and value is None:
+                    value = 'No Role'
+                
+                row_data.append(value)
+            
+            tree.insert('', 'end', values=tuple(row_data))
+                
     def add_record():
   
         def save_record():
