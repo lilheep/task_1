@@ -5,7 +5,6 @@ class BaseModel(Model):
     class Meta:
         database = db_connection
 
-
 class Roles(BaseModel):
     id = AutoField()
     role_name = CharField(max_length=50, unique=True)

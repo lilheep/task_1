@@ -2,3 +2,5 @@ peewee
 pymysql
 cryptography
 fastapi
+uvicorn
+sqlalchemy
