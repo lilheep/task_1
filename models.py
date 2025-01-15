@@ -23,7 +23,7 @@ class Staffs(BaseModel):
 class Students(BaseModel):
     id = AutoField()
     student_name = CharField(max_length=20, unique=True)
-    student_password = CharField(max_length=50, unique=True)
+    student_password = CharField(max_length=50, unique=True, null=False)
 
 
 def initialize_tables():
