@@ -1,10 +1,18 @@
 from fastapi import FastAPI, Depends, HTTPException, Body
+from fastapi.middleware.cors import CORSMiddleware
 from models import Roles, Users, Staffs, Students, db_connection
 from peewee import Model, DoesNotExist, ForeignKeyField
 from typing import List, Any, Dict
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def connect_to_db():
     if db_connection.is_closed():
