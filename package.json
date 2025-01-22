@@ -1,0 +1,19 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "module:load": "pip install -r requirements.txt",
+    "start:backend": "uvicorn backend.web:app --reload",
+    "start:frontend": "node backend/server.js",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+  },
+  "author": "AndryxaTorpeda",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "concurrently": "^9.1.2",
+    "express": "^4.21.2",
+    "http-server": "^14.1.1"
+  }
+}
