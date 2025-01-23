@@ -5,7 +5,7 @@ export function renderTable(data, tableSelector) {
     if (!data.length) {
         table.querySelector("tbody").innerHTML = `
            <tr>
-                <td colspan="3">There is no data to display</td>
+                <td colspan=${colspan}>There is no data to display</td>
            </tr> 
            `;
            return;

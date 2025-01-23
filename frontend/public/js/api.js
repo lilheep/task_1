@@ -1,6 +1,6 @@
 export async function fetchData(tableName) {
 
-    const urlApi = `http://localhost:8000/${tableName}/`;
+    const urlApi = `http://localhost:8000/${endpoint}/`;
     
     try {
         const response = await fetch(urlApi);
